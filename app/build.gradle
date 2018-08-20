@@ -29,69 +29,69 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-buildscript {
-    repositories {
-        maven {
-            url uri('../repo')
-        }
-    }
-    dependencies {
-        classpath 'com.threetrees.plugin:plugin:1.0.0'
-    }
-}
+//buildscript {
+//    repositories {
+//        maven {
+//            url uri('../repo')
+//        }
+//    }
+//    dependencies {
+//        classpath 'com.threetrees.plugin:plugin:1.0.0'
+//    }
+//}
 
 //apply from: 'config.gradle'
 
-apply plugin: 'ttreeplugin'
-
-import com.threetrees.plugin.asm.AutoMethodVisitor
-import org.objectweb.asm.AnnotationVisitor
-import org.objectweb.asm.MethodVisitor
-import org.objectweb.asm.Opcodes
-
-ttree {
-    isDebug = true
-    //具体配置
-    matchData = [
-            //是否使用注解来找对应方法
-            'isAnotation'  : false,
-            //方法的匹配，可以通过类名或者实现的接口名匹配
-            'ClassFilter'  : [
-                    ['ClassName' : 'com/threetree/ttreeplugin.MainActivity', 'InterfaceName': '',
-                     'MethodName': 'test', 'MethodDes': '()V']
-            ],
-            //插入的字节码，方法的执行顺序visitAnnotation->onMethodEnter->onMethodExit
-            'MethodVisitor': {
-                MethodVisitor methodVisitor, int access, String name, String desc ->
-                    MethodVisitor adapter = new AutoMethodVisitor(methodVisitor, access, name, desc) {
-                        boolean isAnnotation = false
-
-                        @Override
-                        protected void onMethodEnter() {
-                            super.onMethodEnter()
-                            methodVisitor.visitLdcInsn(name);
-                            methodVisitor.visitLdcInsn("========start=========");
-                            methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "android/util/Log", "e", "(Ljava/lang/String;Ljava/lang/String;)I", false);
-                        }
-
-                        @Override
-                        protected void onMethodExit(int opcode) {
-                            super.onMethodExit(opcode)
-
-                            methodVisitor.visitLdcInsn(name);
-                            methodVisitor.visitLdcInsn("========end=========");
-                            methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "android/util/Log", "e", "(Ljava/lang/String;Ljava/lang/String;)I", false);
-                        }
-
-                        /**
-                         * 需要通过注解的方式加字节码才会重写这个方法来进行条件过滤
-                         */
-                        @Override
-                        AnnotationVisitor visitAnnotation(String des, boolean visible) {
-                            return super.visitAnnotation(des, visible)
-                        }
-                    }
-                    return adapter
-            }
-    ]
-}
+//apply plugin: 'ttreeplugin'
+//
+//import com.threetrees.plugin.asm.AutoMethodVisitor
+//import org.objectweb.asm.AnnotationVisitor
+//import org.objectweb.asm.MethodVisitor
+//import org.objectweb.asm.Opcodes
+//
+//ttree {
+//    isDebug = true
+//    //具体配置
+//    matchData = [
+//            //是否使用注解来找对应方法
+//            'isAnotation'  : false,
+//            //方法的匹配，可以通过类名或者实现的接口名匹配
+//            'ClassFilter'  : [
+//                    ['ClassName' : 'com/threetree/ttreeplugin.MainActivity', 'InterfaceName': '',
+//                     'MethodName': 'test', 'MethodDes': '()V']
+//            ],
+//            //插入的字节码，方法的执行顺序visitAnnotation->onMethodEnter->onMethodExit
+//            'MethodVisitor': {
+//                MethodVisitor methodVisitor, int access, String name, String desc ->
+//                    MethodVisitor adapter = new AutoMethodVisitor(methodVisitor, access, name, desc) {
+//                        boolean isAnnotation = false
+//
+//                        @Override
+//                        protected void onMethodEnter() {
+//                            super.onMethodEnter()
+//                            methodVisitor.visitLdcInsn(name);
+//                            methodVisitor.visitLdcInsn("========start=========");
+//                            methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "android/util/Log", "e", "(Ljava/lang/String;Ljava/lang/String;)I", false);
+//                        }
+//
+//                        @Override
+//                        protected void onMethodExit(int opcode) {
+//                            super.onMethodExit(opcode)
+//
+//                            methodVisitor.visitLdcInsn(name);
+//                            methodVisitor.visitLdcInsn("========end=========");
+//                            methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "android/util/Log", "e", "(Ljava/lang/String;Ljava/lang/String;)I", false);
+//                        }
+//
+//                        /**
+//                         * 需要通过注解的方式加字节码才会重写这个方法来进行条件过滤
+//                         */
+//                        @Override
+//                        AnnotationVisitor visitAnnotation(String des, boolean visible) {
+//                            return super.visitAnnotation(des, visible)
+//                        }
+//                    }
+//                    return adapter
+//            }
+//    ]
+//}
