@@ -59,7 +59,6 @@ public class AutoTransform extends Transform {
              */
             input.jarInputs.each { JarInput jarInput ->
                 String destName = jarInput.file.name
-                Logger.info("||-->开始遍历 ${destName}")
                 /** 截取文件路径的md5值重命名输出文件,因为可能同名,会覆盖*/
                 def hexName = DigestUtils.md5Hex(jarInput.file.absolutePath).substring(0, 8)
                 if (destName.endsWith(".jar")) {

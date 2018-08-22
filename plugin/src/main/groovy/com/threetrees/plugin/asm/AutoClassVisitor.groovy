@@ -52,15 +52,15 @@ public class AutoClassVisitor extends ClassVisitor {
         MethodVisitor adapter = null
 
         if (isMeetClassCondition) {
-            //指定方法名，根据满足的类条件和方法名
-            Logger.info("||-----------------开始修改方法${name}--------------------------")
             Logger.logForEach('||* visitMethod *', Logger.accCode2String(access), name, desc, signature, exceptions)
             try {
                 // 注解的话，使用指定方法
                 if (Controller.isUseAnotation())
                 {
                     adapter = getSettingMethodVisitor(methodVisitor, access, name, desc)
-                }else if (isMatchingSettingMethod(name, desc)){//匹配类和接口
+                }else if (isMatchingSettingMethod(name, desc)){//匹配方法
+                    //指定方法名，根据满足的类条件和方法名
+                    Logger.info("||-----------------开始修改方法${name}--------------------------")
                     adapter = getSettingMethodVisitor(methodVisitor, access, name, desc)
                 }
             } catch (Exception e) {
