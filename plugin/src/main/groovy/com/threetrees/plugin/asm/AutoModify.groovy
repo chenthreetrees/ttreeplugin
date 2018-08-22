@@ -43,7 +43,7 @@ public class AutoModify {
 
             byte[] modifiedClassBytes = null
             byte[] sourceClassBytes = IOUtils.toByteArray(inputStream)
-            if (entryName.endsWith(".class")) {
+            if (entryName.endsWith(".class") && notRClass(entryName) && notSupport(entryName)) {
                 className = entryName.replace("/", ".").replace(".class", "")
                 modifiedClassBytes = modifyClasses(className, sourceClassBytes)
             }
@@ -63,10 +63,6 @@ public class AutoModify {
         byte[] classBytesCode = null
         try {
             classBytesCode = modifyClass(srcByteCode)
-            //调试模式下再遍历一遍看修改的方法情况
-//            if (Logger.isDebug()) {
-//                seeModifyMethod(classBytesCode)
-//            }
             return classBytesCode
         } catch (Exception e) {
             e.printStackTrace()
@@ -98,5 +94,19 @@ public class AutoModify {
         ClassVisitor cv = new AutoClassVisitor(cw)
         cv.seeModifyMethod = true
         cr.accept(cv, ClassReader.EXPAND_FRAMES)
+    }
+
+    /**
+     * 不是R系列的class
+     */
+    private static boolean notRClass(String name) {
+        return !name.endsWith("R.class") && !name.contains("R\$") && !name.contains("\$") && !name.endsWith("BuildConfig.class")
+    }
+
+    /**
+     * 不是Support系列包
+     */
+    private static boolean notSupport(String name) {
+        return !name.contains("android/support")
     }
 }

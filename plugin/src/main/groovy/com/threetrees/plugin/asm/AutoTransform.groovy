@@ -59,23 +59,21 @@ public class AutoTransform extends Transform {
              */
             input.jarInputs.each { JarInput jarInput ->
                 String destName = jarInput.file.name
+                Logger.info("||-->开始遍历 ${destName}")
                 /** 截取文件路径的md5值重命名输出文件,因为可能同名,会覆盖*/
                 def hexName = DigestUtils.md5Hex(jarInput.file.absolutePath).substring(0, 8)
                 if (destName.endsWith(".jar")) {
                     destName = destName.substring(0, destName.length() - 4)
                 }
-                if(!notRClass(destName) || !notSupport(destName))
-                {
-                    return
-                }
                 /** 获得输出文件*/
                 File dest = outputProvider.getContentLocation(destName + "_" + hexName, jarInput.contentTypes, jarInput.scopes, Format.JAR)
                 Logger.info("||-->开始遍历特定jar ${dest.absolutePath}")
                 def modifiedJar = modifyJarFile(jarInput.file, context.getTemporaryDir())
-                Logger.info("||-->结束遍历特定jar ${dest.absolutePath}")
-                if (modifiedJar == null) {
+                if(modifiedJar == null)
+                {
                     modifiedJar = jarInput.file
                 }
+                Logger.info("||-->结束遍历特定jar ${dest.absolutePath}")
                 FileUtils.copyFile(modifiedJar, dest)
             }
             /**
@@ -127,19 +125,6 @@ public class AutoTransform extends Transform {
         return null
     }
 
-    /**
-     * 不是R系列的class
-     */
-    private static boolean notRClass(String name) {
-        return !name.endsWith("R.class") && !name.contains("R\$") && !name.contains("\$") && !name.endsWith("BuildConfig.class")
-    }
-
-    /**
-     * 不是Support系列包
-     */
-    private static boolean notSupport(String name) {
-        return !name.contains("android/support")
-    }
 
     /**
      * 目录文件中修改对应字节码
@@ -149,10 +134,6 @@ public class AutoTransform extends Transform {
         try {
 
             String className = TextUtil.path2ClassName(classFile.absolutePath.replace(dir.absolutePath + File.separator, ""))
-            if(!notRClass(className) || !notSupport(className))
-            {
-                return null
-            }
             byte[] sourceClassBytes = IOUtils.toByteArray(new FileInputStream(classFile))
             byte[] modifiedClassBytes = AutoModify.modifyClasses(className, sourceClassBytes)
             if (modifiedClassBytes) {

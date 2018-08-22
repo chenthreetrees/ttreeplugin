@@ -40,15 +40,15 @@ dependencies {
 //        classpath 'com.threetrees.plugin:plugin:1.0.0'
 //    }
 //}
-
+//
 //apply plugin: 'ttreeplugin'
-
-
+//
+//
 //import com.threetrees.plugin.asm.AutoMethodVisitor
 //import org.objectweb.asm.AnnotationVisitor
 //import org.objectweb.asm.MethodVisitor
 //import org.objectweb.asm.Opcodes
-
+//
 //ttree {
 //    isDebug = true
 //    //具体配置

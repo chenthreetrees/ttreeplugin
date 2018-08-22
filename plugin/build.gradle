@@ -28,14 +28,14 @@ repositories {
 
 //group='com.threetrees.plugin'
 //version='1.0.0'
-
-//uploadArchives 类型是upload，这个task不是'maven'创建的
-//而是'maven'定义了一个rule,而后由我们自己创建的
-uploadArchives{
-    //本地仓库的一种
-    repositories{
-        mavenDeployer {
-            repository(url: uri('../repo'))
-        }
-    }
-}
+//
+////uploadArchives 类型是upload，这个task不是'maven'创建的
+////而是'maven'定义了一个rule,而后由我们自己创建的
+//uploadArchives{
+//    //本地仓库的一种
+//    repositories{
+//        mavenDeployer {
+//            repository(url: uri('../repo'))
+//        }
+//    }
+//}
