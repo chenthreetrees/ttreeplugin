@@ -64,6 +64,10 @@ public class AutoTransform extends Transform {
                 if (destName.endsWith(".jar")) {
                     destName = destName.substring(0, destName.length() - 4)
                 }
+                if(!notRClass(destName) || !notSupport(destName))
+                {
+                    return
+                }
                 /** 获得输出文件*/
                 File dest = outputProvider.getContentLocation(destName + "_" + hexName, jarInput.contentTypes, jarInput.scopes, Format.JAR)
                 Logger.info("||-->开始遍历特定jar ${dest.absolutePath}")
@@ -119,7 +123,6 @@ public class AutoTransform extends Transform {
     private static File modifyJarFile(File jarFile, File tempDir) {
         if (jarFile) {
             return AutoModify.modifyJar(jarFile, tempDir, true)
-
         }
         return null
     }

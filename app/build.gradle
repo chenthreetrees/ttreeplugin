@@ -3,6 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.3"
+
     defaultConfig {
         applicationId "com.threetree.ttreeplugin"
         minSdkVersion 15
@@ -29,69 +30,87 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-//buildscript {
-//    repositories {
-//        maven {
-//            url uri('../repo')
-//        }
-//    }
-//    dependencies {
-//        classpath 'com.threetrees.plugin:plugin:1.0.0'
-//    }
-//}
+buildscript {
+    repositories {
+        maven {
+            url uri('../repo')
+        }
+    }
+    dependencies {
+        classpath 'com.threetrees.plugin:plugin:1.0.0'
+    }
+}
 
-//apply from: 'config.gradle'
+apply plugin: 'ttreeplugin'
 
-//apply plugin: 'ttreeplugin'
-//
-//import com.threetrees.plugin.asm.AutoMethodVisitor
-//import org.objectweb.asm.AnnotationVisitor
-//import org.objectweb.asm.MethodVisitor
-//import org.objectweb.asm.Opcodes
-//
-//ttree {
-//    isDebug = true
-//    //具体配置
-//    matchData = [
-//            //是否使用注解来找对应方法
-//            'isAnotation'  : false,
-//            //方法的匹配，可以通过类名或者实现的接口名匹配
-//            'ClassFilter'  : [
-//                    ['ClassName' : 'com/threetree/ttreeplugin.MainActivity', 'InterfaceName': '',
-//                     'MethodName': 'test', 'MethodDes': '()V']
-//            ],
-//            //插入的字节码，方法的执行顺序visitAnnotation->onMethodEnter->onMethodExit
-//            'MethodVisitor': {
-//                MethodVisitor methodVisitor, int access, String name, String desc ->
-//                    MethodVisitor adapter = new AutoMethodVisitor(methodVisitor, access, name, desc) {
-//                        boolean isAnnotation = false
-//
-//                        @Override
-//                        protected void onMethodEnter() {
-//                            super.onMethodEnter()
-//                            methodVisitor.visitLdcInsn(name);
-//                            methodVisitor.visitLdcInsn("========start=========");
-//                            methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "android/util/Log", "e", "(Ljava/lang/String;Ljava/lang/String;)I", false);
-//                        }
-//
-//                        @Override
-//                        protected void onMethodExit(int opcode) {
-//                            super.onMethodExit(opcode)
-//
-//                            methodVisitor.visitLdcInsn(name);
-//                            methodVisitor.visitLdcInsn("========end=========");
-//                            methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "android/util/Log", "e", "(Ljava/lang/String;Ljava/lang/String;)I", false);
-//                        }
-//
-//                        /**
-//                         * 需要通过注解的方式加字节码才会重写这个方法来进行条件过滤
-//                         */
-//                        @Override
-//                        AnnotationVisitor visitAnnotation(String des, boolean visible) {
-//                            return super.visitAnnotation(des, visible)
-//                        }
-//                    }
-//                    return adapter
-//            }
-//    ]
-//}
+
+import com.threetrees.plugin.asm.AutoMethodVisitor
+import org.objectweb.asm.AnnotationVisitor
+import org.objectweb.asm.MethodVisitor
+import org.objectweb.asm.Opcodes
+
+ttree {
+    isDebug = true
+    //具体配置
+    matchData = [
+            //是否使用注解来找对应方法
+            'isAnotation'  : false,
+            //方法的匹配，可以通过类名或者实现的接口名匹配
+            'ClassFilter'  : [
+                    //根据类型匹配
+                    ['ClassName' : 'com/threetree/ttreeplugin/MainActivity',
+                     'MethodName': 'test', 'MethodDes': '()V'],
+                    //根据关键字匹配
+                    ['ContainName' : 'Activity',
+                     'MethodName': 'test2', 'MethodDes': '()V'],
+                    //根据接口名匹配
+                    ['InterfaceName': 'android/view/View$OnClickListener',
+                     'MethodName': 'onClick', 'MethodDes': '(Landroid/view/View;)V'],
+                    //根据类型匹配
+                    ['ClassName' : 'com/threetree/ttreeplugin/MainActivity',
+                     'MethodName': 'onCreate', 'MethodDes': '(Landroid/os/Bundle;)V']
+            ],
+            //插入的字节码，方法的执行顺序visitAnnotation->onMethodEnter->onMethodExit
+            'MethodVisitor': {
+                MethodVisitor methodVisitor, int access, String name, String desc ->
+                    MethodVisitor adapter = new AutoMethodVisitor(methodVisitor, access, name, desc) {
+                        private boolean hasAnnotation = false;
+                        @Override
+                        protected void onMethodEnter() {
+                            super.onMethodEnter()
+//                            if(hasAnnotation)
+//                            {
+                                methodVisitor.visitLdcInsn(name)
+                                methodVisitor.visitLdcInsn("========start=========")
+                                methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "android/util/Log", "e", "(Ljava/lang/String;Ljava/lang/String;)I", false)
+//                            }
+                        }
+
+                        @Override
+                        protected void onMethodExit(int opcode) {
+                            super.onMethodExit(opcode)
+
+                            if(hasAnnotation)
+                            {
+                                methodVisitor.visitLdcInsn(name)
+                                methodVisitor.visitLdcInsn("========end=========")
+                                methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "android/util/Log", "e", "(Ljava/lang/String;Ljava/lang/String;)I", false)
+                            }
+                        }
+
+                        /**
+                         * 需要通过注解的方式加字节码才会重写这个方法来进行条件过滤
+                         */
+                        @Override
+                        AnnotationVisitor visitAnnotation(String des, boolean visible) {
+                            if ("Lcom/threetree/ttreeplugin/annotation/Permission;".equals(des)) {
+                                println "注解匹配：" + des
+                                hasAnnotation = true
+                            }
+                            return super.visitAnnotation(des, visible)
+                        }
+                    }
+                    return adapter
+            }
+    ]
+}

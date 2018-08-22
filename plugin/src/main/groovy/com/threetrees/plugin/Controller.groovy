@@ -6,7 +6,7 @@ import org.gradle.api.Project
 
 public class Controller {
     private static Project project
-    private static AutoClassFilter autoClassFilter
+    private static List<AutoClassFilter> autoClassFilters = new ArrayList<AutoClassFilter>()
     private static Closure methodVisitor
     private static boolean isUseAnotation
 
@@ -30,17 +30,17 @@ public class Controller {
         return project.ttree
     }
 
-    static void setClassFilter(AutoClassFilter filter) {
-        autoClassFilter = filter
+    static void addClassFilter(AutoClassFilter filter) {
+        autoClassFilters.add(filter)
     }
 
-    static AutoClassFilter getClassFilter() {
-        return autoClassFilter
+    static List<AutoClassFilter> getClassFilters() {
+        return autoClassFilters
     }
     /**
      * 需要满足的类名
      */
-    static String getClassName() {
+    static String getClassName(AutoClassFilter autoClassFilter) {
         if (autoClassFilter == null) {
             return ""
         }
@@ -49,7 +49,7 @@ public class Controller {
     /**
      * 需要满足的实现接口
      */
-    static String getInterfaceName() {
+    static String getInterfaceName(AutoClassFilter autoClassFilter) {
         if (autoClassFilter == null) {
             return ""
         }
@@ -58,7 +58,7 @@ public class Controller {
     /**
      * 需要满足的方法名
      */
-    static String getMethodName() {
+    static String getMethodName(AutoClassFilter autoClassFilter) {
         if (autoClassFilter == null) {
             return ""
         }
@@ -68,7 +68,7 @@ public class Controller {
     /**
      * 需要满足的方法描述符
      */
-    static String getMethodDes() {
+    static String getMethodDes(AutoClassFilter autoClassFilter) {
         if (autoClassFilter == null) {
             return ""
         }

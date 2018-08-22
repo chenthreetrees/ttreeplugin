@@ -3,11 +3,11 @@ package com.threetrees.plugin
 import com.android.build.gradle.AppExtension
 import com.threetrees.plugin.asm.AutoClassFilter
 import com.threetrees.plugin.asm.AutoTransform
+import com.threetrees.plugin.asm.Logger
 import com.threetrees.plugin.asm.PluginSetting
+import com.threetrees.plugin.util.TextUtil
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import com.threetrees.plugin.asm.Logger
-import com.threetrees.plugin.util.TextUtil
 
 class TtreePlugin implements Plugin<Project> {
 
@@ -36,9 +36,9 @@ class TtreePlugin implements Plugin<Project> {
         Map<String, Object> matchData = Controller.getSettings().matchData
 
         List<Map<String, Object>> paramsList = matchData.get("ClassFilter")
-        AutoClassFilter classFilter = new AutoClassFilter()
         paramsList.each {
             Map<String, Object> map ->
+                String containName = map.get("ContainName")
                 String className = map.get("ClassName")
                 String interfaceName = map.get("InterfaceName")
                 String methodName = map.get("MethodName")
@@ -52,12 +52,14 @@ class TtreePlugin implements Plugin<Project> {
                     interfaceName = TextUtil.changeClassNameSeparator(interfaceName)
                 }
 
+                AutoClassFilter classFilter = new AutoClassFilter()
+                classFilter.setContainName(containName)
                 classFilter.setClassName(className)
                 classFilter.setInterfaceName(interfaceName)
                 classFilter.setMethodName(methodName)
                 classFilter.setMethodDes(methodDes)
-                Controller.setClassFilter(classFilter)
-                println '应用传递过来的数据->' + '\n-className:' + className +
+                Controller.addClassFilter(classFilter)
+                println '应用传递过来的数据->' + '\n-containName:' + containName + '\n-className:' + className +
                         '\n-interfaceName:' + interfaceName + '\n-methodName:' + methodName + '\n-methodDes:' + methodDes
         }
         //设置是否使用注解查找相关方法，是的话把指定过来条件去掉
