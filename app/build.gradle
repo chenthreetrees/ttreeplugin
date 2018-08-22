@@ -30,16 +30,16 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-buildscript {
-    repositories {
-        maven {
-            url uri('../repo')
-        }
-    }
-    dependencies {
-        classpath 'com.threetrees.plugin:plugin:1.0.0'
-    }
-}
+//buildscript {
+//    repositories {
+//        maven {
+//            url uri('../repo')
+//        }
+//    }
+//    dependencies {
+//        classpath 'com.threetrees.plugin:plugin:1.0.0'
+//    }
+//}
 
 apply plugin: 'ttreeplugin'
 
