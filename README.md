@@ -114,6 +114,16 @@ apply plugin: 'ttreeplugin'
 
 ### 使用插件拓展包
 
+项目的gradle文件：
+```
+allprojects {
+    repositories {
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+在app的gradle文件引用依赖：
 ```
 compile 'com.github.chenthreetrees:ttreepluginext:1.0.1'
 ```
