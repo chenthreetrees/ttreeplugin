@@ -28,7 +28,6 @@ public class AutoMethodVisitor extends AdviceAdapter {
     public AutoMethodVisitor(MethodVisitor mv, int access, String name, String desc,String clsName,int matchType) {
         super(Opcodes.ASM5, mv, access, name, desc)
         className = TextUtil.changeClassNameDot(clsName)
-        Logger.info("className${className}")
         methodName = name
         annotations = new ArrayList<AutoAnnotationVisitor>()
         map = new HashMap<>()
