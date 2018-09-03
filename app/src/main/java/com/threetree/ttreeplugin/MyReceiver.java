@@ -22,7 +22,7 @@ public class MyReceiver {
      * @param methodName
      * @param objects
      */
-    public static void onMethodEnterForClass(String methodName,Object[] objects)
+    public static void onMethodEnterForClass(String className,String methodName,Object[] objects)
     {
         Log.e("onMethodEnterForClass",methodName);
         if("onClick".equals(methodName))
@@ -40,7 +40,7 @@ public class MyReceiver {
      * @param methodName
      * @param objects
      */
-    public static void onMethodExitForClass(String methodName,Object[] objects)
+    public static void onMethodExitForClass(String className,String methodName,Object[] objects)
     {
         Log.e("onMethodExitForClass",methodName);
         if("onClick".equals(methodName))

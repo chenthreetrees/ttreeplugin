@@ -8,6 +8,7 @@ import org.objectweb.asm.commons.AdviceAdapter
 
 public class AutoMethodVisitor extends AdviceAdapter {
 
+    String className
     String methodName
     List<AutoAnnotationVisitor> annotations
 
@@ -20,14 +21,15 @@ public class AutoMethodVisitor extends AdviceAdapter {
     //注解的路径
     String annotationPath
 
-    public AutoMethodVisitor(MethodVisitor mv, int access, String name, String desc) {
-        this(mv,access,name,desc,0)
+    public AutoMethodVisitor(MethodVisitor mv, int access, String name, String desc, String clsName) {
+        this(mv,access,name,desc,clsName,0)
     }
 
-    public AutoMethodVisitor(MethodVisitor mv, int access, String name, String desc,int matchType) {
+    public AutoMethodVisitor(MethodVisitor mv, int access, String name, String desc,String clsName,int matchType) {
         super(Opcodes.ASM5, mv, access, name, desc)
+        className = TextUtil.changeClassNameDot(clsName)
+        Logger.info("className${className}")
         methodName = name
-        methodDesc = desc
         annotations = new ArrayList<AutoAnnotationVisitor>()
         map = new HashMap<>()
         annotationReceive = "com/threetree/pluginutil/TtreeReceiver"
@@ -225,6 +227,7 @@ public class AutoMethodVisitor extends AdviceAdapter {
             return
         }
 
+        mv.visitLdcInsn(className)
         mv.visitLdcInsn(methodName)
 
         boolean isStatic = false
@@ -248,11 +251,11 @@ public class AutoMethodVisitor extends AdviceAdapter {
         if(!TextUtil.isEmpty(receiver))
         {
             mv.visitMethodInsn(INVOKESTATIC, receiver,
-                    action, "(Ljava/lang/String;[Ljava/lang/Object;)V", false)
+                    action, "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)V", false)
         }else
         {
             mv.visitMethodInsn(INVOKESTATIC, classReceiver,
-                    action, "(Ljava/lang/String;[Ljava/lang/Object;)V", false)
+                    action, "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)V", false)
         }
 
     }

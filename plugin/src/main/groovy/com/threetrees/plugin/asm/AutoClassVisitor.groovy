@@ -145,7 +145,7 @@ public class AutoClassVisitor extends ClassVisitor {
         if (vivi != null && result==4) {
             Logger.info("||-----------------外部配置匹配${name}--------------------------")
             try {
-                adapter = vivi(methodVisitor, access, name, desc)
+                adapter = vivi(methodVisitor, access, name, desc, mClassName)
             } catch (Exception e) {
                 e.printStackTrace()
             }
@@ -153,7 +153,7 @@ public class AutoClassVisitor extends ClassVisitor {
 
         if(adapter == null)
         {
-            adapter = new AutoMethodVisitor(methodVisitor,access,name,desc,result)
+            adapter = new AutoMethodVisitor(methodVisitor,access,name,desc,mClassName,result)
         }
         return adapter
     }

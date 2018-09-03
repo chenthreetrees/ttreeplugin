@@ -36,8 +36,8 @@ ttree {
             ],
             //插入的字节码，方法的执行顺序visitAnnotation->onMethodEnter->onMethodExit
             'MethodVisitor': {
-                MethodVisitor methodVisitor, int access, String name, String desc ->
-                    AutoMethodVisitor adapter = new AutoMethodVisitor(methodVisitor, access, name, desc) {
+                MethodVisitor methodVisitor, int access, String name, String desc, String className ->
+                    AutoMethodVisitor adapter = new AutoMethodVisitor(methodVisitor, access, name, desc, className) {
                         @Override
                         protected void onMethodEnter() {
                             super.onMethodEnter();
@@ -68,11 +68,11 @@ ClassFilter，ClassName，MethodName，ContainName，InterfaceName，MethodDes�
 
 **AnnotationReceiver:** String类型，使用自定义注解时，处理注解的类，必须使用全路径，
 					处理的方法必须是：`public static void onMethodExitForAnnotation`和`public static void onMethodExitForAnnotation`，
-					参数必须是：`(String annotationName,String methodName, String jsonValue)`，jsonValue的结构是Hashmap<String,Object>,对应注解的key和value。
+					参数类型必须是：`(String annotationName,String methodName, String jsonValue)`，jsonValue的结构是Hashmap<String,Object>,对应注解的key和value。
 					
 **ClassReceiver:** String类型，使用匹配规则时的处理类，必须使用全路径，可以与AnnotationReceiver同名，
 					处理的方法必须是：`public static void onMethodEnterForClass`和`public static void onMethodExitForClass`，
-					参数必须是：`(String methodName,Object[] objects)`,objects存放了methodName这个方法的参数值，
+					参数类型必须是：`(String className,String methodName,Object[] objects)`,objects存放了methodName这个方法的参数值，
 					自定义ClassReceiver之后，拓展包里面的ClassReceiver将不再接收。
 					
 **ClassName:** String类型，类名，全路径
@@ -86,6 +86,7 @@ ClassFilter，ClassName，MethodName，ContainName，InterfaceName，MethodDes�
 **MethodDes:** String类型，方法的描述符
 
 **Override:** boolean类型，是否重载MethodVisitor（高级用法，需要对asm有一定的了解）
+
 **MethodVisitor:** 在Override为true的时候使用（参考demo）
 
 **匹配规则优先级:** ClassName > InterfaceName > ContainName
@@ -102,7 +103,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.github.chenthreetrees:ttreeplugin:2.0.1'
+        classpath 'com.github.chenthreetrees:ttreeplugin:2.0.2'
     }
 }
 ```
@@ -125,7 +126,7 @@ allprojects {
 
 在app的gradle文件引用依赖：
 ```
-compile 'com.github.chenthreetrees:ttreepluginext:1.0.1'
+compile 'com.github.chenthreetrees:ttreepluginext:1.0.2'
 ```
 
 在application初始化：
@@ -160,7 +161,8 @@ TtreePlugin.setOnCutListener(new TtreePlugin.IOnCutListener() {
 
 **动态权限申请**
 
-注意：动态申请的权限需要在manifest注册
+**注意**：动态申请的权限需要在manifest注册
+
 在需要动态申请权限的方法添加注解
 `@Permission`，权限使用`PermissionConsts`里面的值
 例如：
@@ -201,16 +203,17 @@ ttree {
 ```
 TtreePlugin.setOnTrackListener(new TtreePlugin.IOnTrackListener() {
             @Override
-            public void onTrackEnter(String methodName, Object[] objects)
+            public void onTrackEnter(String className,String methodName, Object[] objects)
             {  
             }
 
             @Override
-            public void onTrackExit(String methodName, Object[] objects)
+            public void onTrackExit(String className,String methodName, Object[] objects)
             {
             }
         });
 ```
+**编译完成后，可以在app项目路径build\intermediates\transforms\AutoTransform查看最终注入的代码**
 
 **其他使用场景，在平时开发中有遇到，再进行拓展**
 

@@ -41,9 +41,9 @@ public final  class TtreePlugin {
      */
     public interface IOnTrackListener
     {
-        void onTrackEnter(String methodName,Object[] objects);
+        void onTrackEnter(String className,String methodName,Object[] objects);
 
-        void onTrackExit(String methodName,Object[] objects);
+        void onTrackExit(String className,String methodName,Object[] objects);
     }
 
     /**
