@@ -1,135 +1,259 @@
 package com.threetrees.plugin.asm
 
-
-import org.objectweb.asm.AnnotationVisitor
-import org.objectweb.asm.Attribute
-import org.objectweb.asm.Label
-import org.objectweb.asm.MethodVisitor
-import org.objectweb.asm.Opcodes
+import com.threetrees.plugin.Controller
+import com.threetrees.plugin.util.TextUtil
+import groovy.json.JsonOutput
+import org.objectweb.asm.*
 import org.objectweb.asm.commons.AdviceAdapter
 
 public class AutoMethodVisitor extends AdviceAdapter {
 
     String methodName
+    List<AutoAnnotationVisitor> annotations
+
+    Map<String,HashMap<String,Object>> map
+    int mMatchType
+    //注解的接收者
+    String annotationReceive
+    //类匹配的接收者
+    String classReceiver
+    //注解的路径
+    String annotationPath
 
     public AutoMethodVisitor(MethodVisitor mv, int access, String name, String desc) {
-        super(Opcodes.ASM4, mv, access, name, desc)
+        this(mv,access,name,desc,0)
+    }
+
+    public AutoMethodVisitor(MethodVisitor mv, int access, String name, String desc,int matchType) {
+        super(Opcodes.ASM5, mv, access, name, desc)
         methodName = name
+        methodDesc = desc
+        annotations = new ArrayList<AutoAnnotationVisitor>()
+        map = new HashMap<>()
+        annotationReceive = "com/threetree/pluginutil/TtreeReceiver"
+        classReceiver = "com/threetree/pluginutil/TtreeReceiver"
+        annotationPath = "Lcom/threetree/pluginutil/annotation"
+        mMatchType = matchType
+        if(matchType != 0)
+        {
+            Logger.info("||-----------------匹配到方法${methodName}--------------------------")
+        }
     }
 
     @Override
     public void visitMethodInsn(int opcode, String owner, String name, String desc) {
 
-        Logger.logForEach("||visitMethodInsn", Logger.getOpName(opcode), owner, name, desc)
         super.visitMethodInsn(opcode, owner, name, desc)
     }
 
     @Override
     public void visitAttribute(Attribute attribute) {
-        Logger.logForEach("||visitAttribute", attribute)
         super.visitAttribute(attribute)
     }
 
     @Override
     public void visitEnd() {
-        Logger.logForEach("||visitEnd")
-        Logger.info("||-----------------结束方法${methodName}--------------------------")
         super.visitEnd()
     }
 
     @Override
     public void visitFieldInsn(int opcode, String owner, String name, String desc) {
-        Logger.logForEach("||visitFieldInsn", Logger.getOpName(opcode), owner, name, desc)
         super.visitFieldInsn(opcode, owner, name, desc)
     }
 
     @Override
     public void visitIincInsn(int var, int increment) {
-        Logger.logForEach("||visitIincInsn", var, increment)
         super.visitIincInsn(var, increment)
     }
 
     @Override
     public void visitIntInsn(int i, int i1) {
-        Logger.logForEach("||visitIntInsn", i, i1)
         super.visitIntInsn(i, i1)
     }
 
     @Override
     public void visitMaxs(int maxStack, int maxLocals) {
-        Logger.logForEach("||visitMaxs", maxStack, maxLocals)
         super.visitMaxs(maxStack, maxLocals)
     }
 
     @Override
     public void visitVarInsn(int opcode, int var) {
-        Logger.logForEach("||visitVarInsn", Logger.getOpName(opcode), var)
         super.visitVarInsn(opcode, var)
     }
 
     @Override
     public void visitJumpInsn(int opcode, Label label) {
-        Logger.logForEach("||visitJumpInsn", Logger.getOpName(opcode), label)
         super.visitJumpInsn(opcode, label)
     }
 
     @Override
     public void visitLookupSwitchInsn(Label label, int[] ints, Label[] labels) {
-        Logger.logForEach("||visitLookupSwitchInsn", label, ints, labels)
         super.visitLookupSwitchInsn(label, ints, labels)
     }
 
     @Override
     public void visitMultiANewArrayInsn(String s, int i) {
-        Logger.logForEach("||visitMultiANewArrayInsn", s, i)
         super.visitMultiANewArrayInsn(s, i)
     }
 
     @Override
     public void visitTableSwitchInsn(int i, int i1, Label label, Label[] labels) {
-        Logger.logForEach("||visitTableSwitchInsn", i, i1, label, labels)
         super.visitTableSwitchInsn(i, i1, label, labels)
     }
 
     @Override
     public void visitTryCatchBlock(Label label, Label label1, Label label2, String s) {
-        Logger.logForEach("||visitTryCatchBlock", label, label1, label2, s)
         super.visitTryCatchBlock(label, label1, label2, s)
     }
 
     @Override
     public void visitTypeInsn(int opcode, String s) {
-        Logger.logForEach("||visitTypeInsn", Logger.getOpName(opcode), s)
         super.visitTypeInsn(opcode, s)
     }
 
     @Override
     public void visitLocalVariable(String s, String s1, String s2, Label label, Label label1, int i) {
-        Logger.logForEach("||visitLocalVariable", s, s1, s2, label, label1, i)
         super.visitLocalVariable(s, s1, s2, label, label1, i)
     }
 
     @Override
     public void visitInsn(int opcode) {
-        Logger.logForEach("||visitInsn", Logger.getOpName(opcode))
         super.visitInsn(opcode)
     }
 
     @Override
-    AnnotationVisitor visitAnnotation(String s, boolean b) {
-        Logger.logForEach("||visitAnnotation", s)
-        return super.visitAnnotation(s, b)
+    public AnnotationVisitor visitAnnotation(String s, boolean b) {
+        AnnotationVisitor _annotationVisitor = super.visitAnnotation(s, b);
+        String path = Controller.getAnnotationPath()
+        if(s.contains(annotationPath) || (!TextUtil.isEmpty(path) && s.contains(path)))
+        {
+            Logger.info("||-----------------匹配注解${s}--------------------------")
+            map.put(s,new HashMap<String,Object>())
+            AutoAnnotationVisitor autoAnnotationVisitor = new AutoAnnotationVisitor(Opcodes.ASM5,_annotationVisitor,s) {
+                HashMap<String,Object> hashMap = map.get(s)
+                @Override
+                void visit(String name, Object value) {
+                    if(name!=null && value!=null)
+                    {
+                        hashMap.put(name,value)
+                    }
+                }
+
+                @Override
+                AnnotationVisitor visitArray(String arrayName) {
+                    List list = new ArrayList()
+                    hashMap.put(arrayName,list)
+                    return new AnnotationVisitor(Opcodes.ASM5,_annotationVisitor) {
+                        @Override
+                        void visit(String name, Object value) {
+                            List _list = hashMap.get(arrayName)
+                            _list.add(value)
+                            hashMap.put(arrayName,_list)
+                        }
+                    }
+                }
+            }
+            annotations.add(autoAnnotationVisitor)
+            return autoAnnotationVisitor
+        }
+
+        return _annotationVisitor
     }
 
     @Override
     protected void onMethodEnter() {
-        Logger.logForEach("||onMethodEnter")
         super.onMethodEnter()
+        annotations.each {
+            AutoAnnotationVisitor autoAnnotationVisitor ->
+                onMethod(autoAnnotationVisitor,"onMethodEnterForAnnotation")
+        }
+
+        if(mMatchType != 0)
+        {
+            Logger.info("||-----------------onMethodEnterForClass: ${methodName}--------------------------")
+            onMethodForClass("onMethodEnterForClass");
+        }
+
     }
 
     @Override
     protected void onMethodExit(int opcode) {
-        Logger.logForEach("||onMethodExit", Logger.getOpName(opcode))
         super.onMethodExit(opcode)
+        annotations.each {
+            AutoAnnotationVisitor autoAnnotationVisitor ->
+                onMethod(autoAnnotationVisitor,"onMethodExitForAnnotation")
+        }
+
+        if(mMatchType != 0)
+        {
+            Logger.info("||-----------------onMethodExitForClass: ${methodName}--------------------------")
+            onMethodForClass("onMethodExitForClass");
+        }
+    }
+
+    public void onMethod(AutoAnnotationVisitor autoAnnotationVisitor,String action)
+    {
+        String anno = TextUtil.changeClassNameDot(autoAnnotationVisitor.mAnnotationName)
+        anno = TextUtil.changeName(anno)
+
+        mv.visitLdcInsn(anno)
+        mv.visitLdcInsn(methodName)
+        def jsonOutput = new JsonOutput()
+        def result = jsonOutput.toJson(map.get(autoAnnotationVisitor.mAnnotationName))
+        //格式化输出
+        println(jsonOutput.prettyPrint(result))
+        mv.visitLdcInsn(result)
+
+        if(autoAnnotationVisitor.mAnnotationName.contains(annotationPath))
+        {
+            mv.visitMethodInsn(INVOKESTATIC, annotationReceive,
+                    action, "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false)
+        }else if(autoAnnotationVisitor.mAnnotationName.contains(Controller.getAnnotationPath()))
+        {
+            mv.visitMethodInsn(INVOKESTATIC, Controller.getAnnotationReceiver(),
+                    action, "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false)
+        }
+    }
+
+    public void onMethodForClass(String action)
+    {
+        // synthetic 方法暂时不aop 比如AsyncTask 会生成一些同名 synthetic方法,对synthetic 以及private的方法也插入的代码，主要是针对lambda表达式
+        if (((methodAccess & Opcodes.ACC_SYNTHETIC) != 0) && ((methodAccess & Opcodes.ACC_PRIVATE) == 0)) {
+            return
+        }
+        if ((methodAccess & Opcodes.ACC_NATIVE) != 0) {
+            return
+        }
+
+        mv.visitLdcInsn(methodName)
+
+        boolean isStatic = false
+        if ((methodAccess & ACC_STATIC) == 0) {
+            isStatic = false
+        } else {
+            isStatic = true
+        }
+
+        List<Type> paramsTypeClass = new ArrayList()
+        Type[] argsType = Type.getArgumentTypes(methodDesc)
+        for (Type type : argsType) {
+            paramsTypeClass.add(type)
+        }
+        if (paramsTypeClass.size() == 0) {
+            push((String) null)
+        } else {
+            ParamsHelper.createObjectArray(mv, paramsTypeClass, isStatic)
+        }
+        String receiver = Controller.getClassReceiver()
+        if(!TextUtil.isEmpty(receiver))
+        {
+            mv.visitMethodInsn(INVOKESTATIC, receiver,
+                    action, "(Ljava/lang/String;[Ljava/lang/Object;)V", false)
+        }else
+        {
+            mv.visitMethodInsn(INVOKESTATIC, classReceiver,
+                    action, "(Ljava/lang/String;[Ljava/lang/Object;)V", false)
+        }
+
     }
 }

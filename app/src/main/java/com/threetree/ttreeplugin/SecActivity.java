@@ -6,7 +6,7 @@ package com.threetree.ttreeplugin;
 
 public class SecActivity {
 
-    private void test2()
+    private void testContainName(String name)
     {
 
     }

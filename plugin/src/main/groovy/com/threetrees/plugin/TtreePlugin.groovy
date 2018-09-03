@@ -43,6 +43,7 @@ class TtreePlugin implements Plugin<Project> {
                 String interfaceName = map.get("InterfaceName")
                 String methodName = map.get("MethodName")
                 String methodDes = map.get("MethodDes")
+                boolean override = false
                 // 全类名
                 if (!TextUtil.isEmpty(className)){
                     className = TextUtil.changeClassNameSeparator(className)
@@ -52,20 +53,45 @@ class TtreePlugin implements Plugin<Project> {
                     interfaceName = TextUtil.changeClassNameSeparator(interfaceName)
                 }
 
+                if(map.containsKey("Override"))
+                {
+                    override = map.get("Override")
+                }
+
                 AutoClassFilter classFilter = new AutoClassFilter()
                 classFilter.setContainName(containName)
                 classFilter.setClassName(className)
                 classFilter.setInterfaceName(interfaceName)
                 classFilter.setMethodName(methodName)
                 classFilter.setMethodDes(methodDes)
+                classFilter.setOverride(override)
                 Controller.addClassFilter(classFilter)
-                println '应用传递过来的数据->' + '\n-containName:' + containName + '\n-className:' + className +
-                        '\n-interfaceName:' + interfaceName + '\n-methodName:' + methodName + '\n-methodDes:' + methodDes
+
+                Logger.info('应用传递过来的数据->' + '\n-containName:' + containName + '\n-className:' + className +
+                        '\n-interfaceName:' + interfaceName + '\n-methodName:' +
+                        methodName + '\n-methodDes:' + methodDes + "\n-override:" + override)
         }
-        //设置是否使用注解查找相关方法，是的话把指定过来条件去掉
-        boolean isAnotation = matchData.get("isAnotation")
-        println '应用传递过来的数据->' + '\n-isAnotation:' + isAnotation
-        Controller.setIsUseAnotation(isAnotation)
+
+        String annotationPath = matchData.get("AnnotationPath")
+        if(!TextUtil.isEmpty(annotationPath))
+        {
+            annotationPath = TextUtil.changeClassNameSeparator(annotationPath)
+            Controller.setAnnotationPath("L" + annotationPath)
+        }
+
+        String annotationReceiver = matchData.get("AnnotationReceiver")
+        if(!TextUtil.isEmpty(annotationReceiver))
+        {
+            annotationReceiver = TextUtil.changeClassNameSeparator(annotationReceiver)
+            Controller.setAnnotationReceiver(annotationReceiver)
+        }
+
+        String classReceiver = matchData.get("ClassReceiver")
+        if(!TextUtil.isEmpty(classReceiver))
+        {
+            classReceiver = TextUtil.changeClassNameSeparator(classReceiver)
+            Controller.setClassReceiver(classReceiver)
+        }
 
         Closure methodVistor = matchData.get("MethodVisitor")
         Controller.setMethodVistor(methodVistor)

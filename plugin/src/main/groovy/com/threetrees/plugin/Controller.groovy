@@ -8,7 +8,9 @@ public class Controller {
     private static Project project
     private static List<AutoClassFilter> autoClassFilters = new ArrayList<AutoClassFilter>()
     private static Closure methodVisitor
-    private static boolean isUseAnotation
+    private static String annotationPath
+    private static String annotationReceiver
+    private static String classReceiver
 
     public static void setProject(Project project) {
         Controller.@project = project
@@ -18,13 +20,6 @@ public class Controller {
         return project
     }
 
-    static void setIsUseAnotation(boolean isAnotation) {
-        isUseAnotation = isAnotation
-    }
-
-    static boolean isUseAnotation(){
-        return isUseAnotation
-    }
 
     static PluginSetting getSettings() {
         return project.ttree
@@ -81,5 +76,47 @@ public class Controller {
 
     static Closure getAppMethodVistor() {
         return methodVisitor
+    }
+
+    static void setAnnotationPath(String path)
+    {
+        annotationPath = path
+    }
+
+    static String getAnnotationPath()
+    {
+        if(annotationPath == null)
+        {
+            return ""
+        }
+        return annotationPath
+    }
+
+    static void setAnnotationReceiver(String name)
+    {
+        annotationReceiver = name
+    }
+
+    static String getAnnotationReceiver()
+    {
+        if(annotationReceiver == null)
+        {
+            return ""
+        }
+        return annotationReceiver
+    }
+
+    static void setClassReceiver(String name)
+    {
+        classReceiver = name
+    }
+
+    static String getClassReceiver()
+    {
+        if(classReceiver == null)
+        {
+            return ""
+        }
+        return classReceiver
     }
 }

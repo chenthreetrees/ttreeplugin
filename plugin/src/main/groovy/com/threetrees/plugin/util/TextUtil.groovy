@@ -15,4 +15,16 @@ public class TextUtil {
     static String changeClassNameSeparator(String classname) {
         return classname.replace('.', '/')
     }
+
+    /**
+     * 全类名转换下符号，例如"xxx/xxx/xxx" -> "xxx.xxx.xxx"
+     */
+    static String changeClassNameDot(String classname) {
+        return classname.replace('/', '.')
+    }
+
+    static String changeName(String name)
+    {
+        return name.substring(1,name.length()-1)
+    }
 }

@@ -9,4 +9,5 @@ class AutoClassFilter {
     String InterfaceName
     String MethodName
     String MethodDes
+    boolean Override
 }
