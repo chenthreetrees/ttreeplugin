@@ -126,7 +126,7 @@ allprojects {
 
 在app的gradle文件引用依赖：
 ```
-compile 'com.github.chenthreetrees:ttreepluginext:1.0.2'
+compile 'com.github.chenthreetrees:ttreepluginext:1.0.3'
 ```
 
 在application初始化：

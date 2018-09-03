@@ -28,66 +28,66 @@ dependencies {
 }
 
 
-//buildscript {
-//    repositories {
-//        maven {
-//            url uri('../repo')
-//        }
-//    }
-//    dependencies {
-//        classpath 'com.threetrees.plugin:plugin:1.0.0'
-//    }
-//}
-//
-//apply plugin: 'ttreeplugin'
-//
-//import com.threetrees.plugin.asm.AutoMethodVisitor
-//import org.objectweb.asm.MethodVisitor
-//import org.objectweb.asm.Opcodes
-//
-//ttree {
-//    isDebug = true
-//    //具体配置
-//    matchData = [
-//            'AnnotationPath' : 'com.threetree.ttreeplugin.annotation',
-//            'AnnotationReceiver' : 'com.threetree.ttreeplugin.MyReceiver',
-//            'ClassReceiver' : 'com.threetree.ttreeplugin.MyReceiver',
-//            'ClassFilter'  : [
-//                    //根据类型匹配
-//                    ['ClassName' : 'com/threetree/ttreeplugin/MainActivity',
-//                     'MethodName': 'testClassName', 'MethodDes': '()V'],
-//                    //根据关键字匹配
-//                    ['ContainName' : 'Activity',
-//                     'MethodName': 'testContainName', 'MethodDes': '(Ljava/lang/String;)V'],
-//                    //根据接口名匹配
-//                    ['InterfaceName': 'android/view/View$OnClickListener',
-//                     'MethodName': 'onClick', 'MethodDes': '(Landroid/view/View;)V'],
-//                    //根据类型匹配
-//                    ['ClassName' : 'com/threetree/ttreeplugin/MainActivity',
-//                     'MethodName': 'testOverride', 'MethodDes': '()V', 'Override' : true]
-//            ],
-//            //插入的字节码，方法的执行顺序visitAnnotation->onMethodEnter->onMethodExit
-//            'MethodVisitor': {
-//                MethodVisitor methodVisitor, int access, String name, String desc, String className ->
-//                    AutoMethodVisitor adapter = new AutoMethodVisitor(methodVisitor, access, name, desc, className) {
-//                        @Override
-//                        protected void onMethodEnter() {
-//                            super.onMethodEnter();
-//                            if("testOverride".equals(name))
-//                            {
-//                                methodVisitor.visitLdcInsn(name)
-//                                methodVisitor.visitLdcInsn("========start=========")
-//                                methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "android/util/Log", "e", "(Ljava/lang/String;Ljava/lang/String;)I", false)
-//                            }
-//                        }
-//
-//                        @Override
-//                        protected void onMethodExit(int opcode) {
-//                            super.onMethodExit(opcode)
-//                        }
-//                    }
-//                    return adapter
-//            }
-//    ]
-//}
+buildscript {
+    repositories {
+        maven {
+            url uri('../repo')
+        }
+    }
+    dependencies {
+        classpath 'com.threetrees.plugin:plugin:1.0.0'
+    }
+}
+
+apply plugin: 'ttreeplugin'
+
+import com.threetrees.plugin.asm.AutoMethodVisitor
+import org.objectweb.asm.MethodVisitor
+import org.objectweb.asm.Opcodes
+
+ttree {
+    isDebug = true
+    //具体配置
+    matchData = [
+            'AnnotationPath' : 'com.threetree.ttreeplugin.annotation',
+            'AnnotationReceiver' : 'com.threetree.ttreeplugin.MyReceiver',
+            'ClassReceiver' : 'com.threetree.ttreeplugin.MyReceiver',
+            'ClassFilter'  : [
+                    //根据类型匹配
+                    ['ClassName' : 'com/threetree/ttreeplugin/MainActivity',
+                     'MethodName': 'testClassName', 'MethodDes': '()V'],
+                    //根据关键字匹配
+                    ['ContainName' : 'Activity',
+                     'MethodName': 'testContainName', 'MethodDes': '(Ljava/lang/String;)V'],
+                    //根据接口名匹配
+                    ['InterfaceName': 'android/view/View$OnClickListener',
+                     'MethodName': 'onClick', 'MethodDes': '(Landroid/view/View;)V'],
+                    //根据类型匹配
+                    ['ClassName' : 'com/threetree/ttreeplugin/MainActivity',
+                     'MethodName': 'testOverride', 'MethodDes': '()V', 'Override' : true]
+            ],
+            //插入的字节码，方法的执行顺序visitAnnotation->onMethodEnter->onMethodExit
+            'MethodVisitor': {
+                MethodVisitor methodVisitor, int access, String name, String desc, String className ->
+                    AutoMethodVisitor adapter = new AutoMethodVisitor(methodVisitor, access, name, desc, className) {
+                        @Override
+                        protected void onMethodEnter() {
+                            super.onMethodEnter();
+                            if("testOverride".equals(name))
+                            {
+                                methodVisitor.visitLdcInsn(name)
+                                methodVisitor.visitLdcInsn("========start=========")
+                                methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "android/util/Log", "e", "(Ljava/lang/String;Ljava/lang/String;)I", false)
+                            }
+                        }
+
+                        @Override
+                        protected void onMethodExit(int opcode) {
+                            super.onMethodExit(opcode)
+                        }
+                    }
+                    return adapter
+            }
+    ]
+}
 
