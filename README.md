@@ -59,35 +59,36 @@ ttree {
     ]
 }
 ```
-**注意：**ttree，isDebug，matchData，AnnotationPath,AnnotationReceiver,ClassReceiver
-ClassFilter，ClassName，MethodName，ContainName，InterfaceName，MethodDes，Override，MethodVisitor
+
+**注意:** ttree，isDebug，matchData，AnnotationPath,AnnotationReceiver,ClassReceiver
+ClassFilter，ClassName，MethodName，ContainName，InterfaceName，MethodDes，Override，MethodVisitor，
 这些约定的拼写不能错误。
 
-AnnotationPath：String类型，使用自定义注解时，注解所在的包路径
+**AnnotationPath:** String类型，使用自定义注解时，注解所在的包路径
 
-AnnotationReceiver：String类型，使用自定义注解时，处理注解的类，必须使用全路径
-					处理的方法必须是：`public static void onMethodExitForAnnotation`和`public static void onMethodExitForAnnotation`
-					参数必须是：`(String annotationName,String methodName, String jsonValue)`，jsonValue的结构是Hashmap<String,Object>,对应注解的key和value
+**AnnotationReceiver:** String类型，使用自定义注解时，处理注解的类，必须使用全路径，
+					处理的方法必须是：`public static void onMethodExitForAnnotation`和`public static void onMethodExitForAnnotation`，
+					参数必须是：`(String annotationName,String methodName, String jsonValue)`，jsonValue的结构是Hashmap<String,Object>,对应注解的key和value。
 					
-ClassReceiver：String类型，使用匹配规则时的处理类，必须使用全路径，可以与AnnotationReceiver同名
-					处理的方法必须是：`public static void onMethodEnterForClass`和`public static void onMethodExitForClass`
-					参数必须是：`(String methodName,Object[] objects)`,objects存放了methodName这个方法的参数值
-					自定义ClassReceiver之后，拓展包里面的ClassReceiver将不再接收
+**ClassReceiver:** String类型，使用匹配规则时的处理类，必须使用全路径，可以与AnnotationReceiver同名，
+					处理的方法必须是：`public static void onMethodEnterForClass`和`public static void onMethodExitForClass`，
+					参数必须是：`(String methodName,Object[] objects)`,objects存放了methodName这个方法的参数值，
+					自定义ClassReceiver之后，拓展包里面的ClassReceiver将不再接收。
 					
-ClassName：String类型，类名，全路径
+**ClassName:** String类型，类名，全路径
 
-InterfaceName：String类型，接口名，全路径
+**InterfaceName:** String类型，接口名，全路径
 
-ContainName：String类型，关键字，包含该关键字的所有类
+**ContainName:** String类型，关键字，包含该关键字的所有类
 
-MethodName：String类型，方法名				
+**MethodName:** String类型，方法名				
 	
-MethodDes: String类型，方法的描述符
+**MethodDes:** String类型，方法的描述符
 
-**匹配规则优先级：**ClassName > InterfaceName > ContainName
+**Override:** boolean类型，是否重载MethodVisitor（高级用法，需要对asm有一定的了解）
+**MethodVisitor:** 在Override为true的时候使用（参考demo）
 
-Override：boolean类型，是否重载MethodVisitor（高级用法，需要对asm有一定的了解）
-MethodVisitor：在Override为true的时候使用（参考demo）
+**匹配规则优先级:** ClassName > InterfaceName > ContainName
 
 
 ## 使用
@@ -101,7 +102,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.github.chenthreetrees:ttreeplugin:1.0.1'
+        classpath 'com.github.chenthreetrees:ttreeplugin:2.0.0'
     }
 }
 ```
@@ -114,18 +115,21 @@ apply plugin: 'ttreeplugin'
 ### 使用插件拓展包
 
 ```
+compile 'com.github.chenthreetrees:ttreepluginext:1.0.1'
 ```
 
 在application初始化：
 `TtreePlugin.init(application)`
 
-**该拓展包主要有一下功能：**
+**该拓展包主要有以下功能：**
 
-**方法耗时计算：**
+**方法耗时计算**
+
 在需要统计耗时的方法添加注解
 `@TimeCost`
 
-**切面注入代码：**
+**切面注入代码**
+
 在需要注入代码的方法添加注解
 `@Cut`，注解值可以传type来区分
 在合适的地方添加监听：
@@ -144,7 +148,8 @@ TtreePlugin.setOnCutListener(new TtreePlugin.IOnCutListener() {
 ```
 
 
-**动态权限申请：**
+**动态权限申请**
+
 注意：动态申请的权限需要在manifest注册
 在需要动态申请权限的方法添加注解
 `@Permission`，权限使用`PermissionConsts`里面的值
