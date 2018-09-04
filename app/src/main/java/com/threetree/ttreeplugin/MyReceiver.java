@@ -19,10 +19,12 @@ public class MyReceiver {
 
     /**
      * 通过匹配规则，调用的入口(方法进入时)
+     * @param object
+     * @param className
      * @param methodName
      * @param objects
      */
-    public static void onMethodEnterForClass(String className,String methodName,Object[] objects)
+    public static void onMethodEnterForClass(Object object, String className,String methodName,Object[] objects)
     {
         Log.e("onMethodEnterForClass",methodName);
         if("onClick".equals(methodName))
@@ -36,11 +38,13 @@ public class MyReceiver {
     }
 
     /**
-     * 通过匹配规则，调用的入口（方法退出时）
-     * @param methodName
-     * @param objects
+     * 通过匹配规则，调用的入口(方法退出时)
+     * @param object 该方法所属于的类对象,即this
+     * @param className 类名
+     * @param methodName 方法名
+     * @param objects 方法的参数值
      */
-    public static void onMethodExitForClass(String className,String methodName,Object[] objects)
+    public static void onMethodExitForClass(Object object, String className,String methodName,Object[] objects)
     {
         Log.e("onMethodExitForClass",methodName);
         if("onClick".equals(methodName))

@@ -25,9 +25,9 @@ public class TtreeReceiver {
      * @param methodName
      * @param objects
      */
-    public static void onMethodEnterForClass(String className,String methodName,Object[] objects)
+    public static void onMethodEnterForClass(Object object,String className,String methodName,Object[] objects)
     {
-        handleTrack(ACTION_ENTER,className,methodName,objects);
+        handleTrack(ACTION_ENTER,object,className,methodName,objects);
     }
 
     /**
@@ -35,9 +35,9 @@ public class TtreeReceiver {
      * @param methodName
      * @param objects
      */
-    public static void onMethodExitForClass(String className,String methodName,Object[] objects)
+    public static void onMethodExitForClass(Object object,String className,String methodName,Object[] objects)
     {
-        handleTrack(ACTION_EXIT,className,methodName,objects);
+        handleTrack(ACTION_EXIT,object,className,methodName,objects);
     }
 
     /**
@@ -150,16 +150,16 @@ public class TtreeReceiver {
         }
     }
 
-    private static void handleTrack(String action,String className,String methodName,Object[] objects)
+    private static void handleTrack(String action,Object object,String className,String methodName,Object[] objects)
     {
         if(action.equals(ACTION_ENTER))
         {
             if(TtreePlugin.getOnTrackListener() != null)
-                TtreePlugin.getOnTrackListener().onTrackEnter(className,methodName,objects);
+                TtreePlugin.getOnTrackListener().onTrackEnter(object,className,methodName,objects);
         }else if(action.equals(ACTION_EXIT))
         {
             if(TtreePlugin.getOnTrackListener() != null)
-                TtreePlugin.getOnTrackListener().onTrackExit(className,methodName,objects);
+                TtreePlugin.getOnTrackListener().onTrackExit(object,className,methodName,objects);
         }
     }
 

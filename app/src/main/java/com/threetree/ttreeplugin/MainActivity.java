@@ -49,9 +49,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     //测试切面
     @Cut
-    public void testCut()
+    public int testCut()
     {
-
+        return 0;
     }
 
     //测试耗时和权限

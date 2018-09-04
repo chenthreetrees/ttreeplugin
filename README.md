@@ -72,7 +72,9 @@ ClassFilter，ClassName，MethodName，ContainName，InterfaceName，MethodDes�
 					
 **ClassReceiver:** String类型，使用匹配规则时的处理类，必须使用全路径，可以与AnnotationReceiver同名，
 					处理的方法必须是：`public static void onMethodEnterForClass`和`public static void onMethodExitForClass`，
-					参数类型必须是：`(String className,String methodName,Object[] objects)`,objects存放了methodName这个方法的参数值，
+					参数类型必须是：`(Object object,String className,String methodName,Object[] objects)`，
+					object 表示该方法的类对象指针，即this（注意内部类的this），静态方法该值为null，className表示全路径类名（注意内部类的类名），
+					methodName表示方法名，objects存放了methodName这个方法的参数值，
 					自定义ClassReceiver之后，拓展包里面的ClassReceiver将不再接收。
 					
 **ClassName:** String类型，类名，全路径

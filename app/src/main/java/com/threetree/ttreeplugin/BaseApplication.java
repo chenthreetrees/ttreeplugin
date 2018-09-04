@@ -42,7 +42,7 @@ public class BaseApplication extends Application {
 
         TtreePlugin.setOnTrackListener(new TtreePlugin.IOnTrackListener() {
             @Override
-            public void onTrackEnter(String className,String methodName, Object[] objects)
+            public void onTrackEnter(Object object, String className,String methodName, Object[] objects)
             {
                 if("onClick".equals(methodName))
                 {
@@ -55,7 +55,7 @@ public class BaseApplication extends Application {
             }
 
             @Override
-            public void onTrackExit(String className,String methodName, Object[] objects)
+            public void onTrackExit(Object object, String className,String methodName, Object[] objects)
             {
                 if("onClick".equals(methodName))
                 {

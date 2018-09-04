@@ -226,15 +226,18 @@ public class AutoMethodVisitor extends AdviceAdapter {
             return
         }
 
-        mv.visitLdcInsn(className)
-        mv.visitLdcInsn(methodName)
-
         boolean isStatic = false
+        //如果是静态方法，则没有this实例
         if ((methodAccess & ACC_STATIC) == 0) {
+            loadThis()
             isStatic = false
         } else {
+            push((String) null);
             isStatic = true
         }
+
+        mv.visitLdcInsn(className)
+        mv.visitLdcInsn(methodName)
 
         List<Type> paramsTypeClass = new ArrayList()
         Type[] argsType = Type.getArgumentTypes(methodDesc)
@@ -250,11 +253,11 @@ public class AutoMethodVisitor extends AdviceAdapter {
         if(!TextUtil.isEmpty(receiver))
         {
             mv.visitMethodInsn(INVOKESTATIC, receiver,
-                    action, "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)V", false)
+                    action, "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)V", false)
         }else
         {
             mv.visitMethodInsn(INVOKESTATIC, classReceiver,
-                    action, "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)V", false)
+                    action, "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)V", false)
         }
 
     }
