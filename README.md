@@ -105,7 +105,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.github.chenthreetrees:ttreeplugin:2.0.5'
+        classpath 'com.github.chenthreetrees:ttreeplugin:2.0.6'
     }
 }
 ```
@@ -199,6 +199,25 @@ ttree {
             ]
 }
 ```
+
+MethodDes表示方法描述符，参考如下：
+| 标识字符          | 含义               |
+| ------             | ------             |
+| B              | 基本类型 byte            |
+| C              | 基本类型 char            |
+| D              | 基本类型 double            |
+| F              | 基本类型 float            |
+| I              | 基本类型 int            |
+| J              | 基本类型 long            |
+| S	             | 基本类型 short            |
+| Z	             | 基本类型 boolean            |
+| V              | 特殊类型 void            |
+| L              | 对象类型，如Ljava/lang/Object;            |
+
+用描述符来描述方法时，按照先参数列表，后返回值的顺序描述，参数列表按顺序放在“()”之内。
+对于数组类型，每一维度使用一个前置的“[”字符来描述，如String[][]类型的二维数组，将被记录为“[[Ljava/lang/String;”。
+方法`int indexOf(char[] source,int sourceOffset,int sourceCount,String content)`的描述符为“([IILjava/lang/String;)I”。
+
 请详细阅读配置规则，或者参考demo
 
 在合适的地方添加监听：
