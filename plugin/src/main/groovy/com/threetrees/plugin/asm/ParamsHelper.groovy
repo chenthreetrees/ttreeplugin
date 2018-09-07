@@ -67,7 +67,7 @@ public final class ParamsHelper
             return true
         }
         if("B".equals(typeS)){
-            createBooleanObj(mv, argsPostion)
+            createByteObj(mv, argsPostion)
             return true
         }
         if("C".equals(typeS)){
@@ -98,6 +98,14 @@ public final class ParamsHelper
     }
 
     private static void createBooleanObj(MethodVisitor mv, int argsPostion){
+        mv.visitTypeInsn(Opcodes.NEW, "java/lang/Boolean")
+        mv.visitInsn(Opcodes.DUP)
+        mv.visitVarInsn(Opcodes.ILOAD, argsPostion)
+        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/Boolean", "<init>", "(Z)V")
+        mv.visitInsn(Opcodes.AASTORE)
+    }
+
+    private static void createByteObj(MethodVisitor mv, int argsPostion){
         mv.visitTypeInsn(Opcodes.NEW, "java/lang/Byte")
         mv.visitInsn(Opcodes.DUP)
         mv.visitVarInsn(Opcodes.ILOAD, argsPostion)

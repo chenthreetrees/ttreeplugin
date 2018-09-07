@@ -35,6 +35,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    private void testBoolean(boolean b)
+    {
+
+    }
+
     //测试关键字匹配
     private void testContainName(String name)
     {
