@@ -166,13 +166,18 @@ public class AutoMethodVisitor extends AdviceAdapter {
         super.onMethodEnter()
         annotations.each {
             AutoAnnotationVisitor autoAnnotationVisitor ->
-                onMethod(autoAnnotationVisitor,"onMethodEnterForAnnotation")
+                onMethodForAnnotation(autoAnnotationVisitor,"onMethodEnterForAnnotation")
+                onInterceptForAnnotation(autoAnnotationVisitor)
         }
 
         if(mMatchType != 0)
         {
             Logger.info("||-----------------onMethodEnterForClass: ${methodName}--------------------------")
             onMethodForClass("onMethodEnterForClass");
+            if(mMatchType == 5)
+            {
+                onInterceptForClass()
+            }
         }
 
     }
@@ -182,7 +187,7 @@ public class AutoMethodVisitor extends AdviceAdapter {
         super.onMethodExit(opcode)
         annotations.each {
             AutoAnnotationVisitor autoAnnotationVisitor ->
-                onMethod(autoAnnotationVisitor,"onMethodExitForAnnotation")
+                onMethodForAnnotation(autoAnnotationVisitor,"onMethodExitForAnnotation")
         }
 
         if(mMatchType != 0)
@@ -192,7 +197,7 @@ public class AutoMethodVisitor extends AdviceAdapter {
         }
     }
 
-    public void onMethod(AutoAnnotationVisitor autoAnnotationVisitor,String action)
+    public void onMethodForAnnotation(AutoAnnotationVisitor autoAnnotationVisitor, String action)
     {
         String anno = TextUtil.changeClassNameDot(autoAnnotationVisitor.mAnnotationName)
         anno = TextUtil.changeName(anno)
@@ -259,6 +264,91 @@ public class AutoMethodVisitor extends AdviceAdapter {
             mv.visitMethodInsn(INVOKESTATIC, classReceiver,
                     action, "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)V", false)
         }
-
     }
+
+    public void onInterceptForAnnotation(AutoAnnotationVisitor autoAnnotationVisitor)
+    {
+        HashMap<String,Object> values = map.get(autoAnnotationVisitor.mAnnotationName)
+        if(values.containsKey("onIntercept"))
+        {//如果注解包含了此属性，则认为该注解使用了拦截功能
+
+            Object object = values.get("onIntercept");
+            if(object instanceof Boolean)
+            {//判断该注解的值是否为true
+                boolean flag = (boolean)object;
+                if(flag)
+                {
+                    String anno = TextUtil.changeClassNameDot(autoAnnotationVisitor.mAnnotationName)
+                    anno = TextUtil.changeName(anno)
+
+                    mv.visitLdcInsn(anno)
+                    mv.visitLdcInsn(methodName)
+                    def jsonOutput = new JsonOutput()
+                    def result = jsonOutput.toJson(map.get(autoAnnotationVisitor.mAnnotationName))
+                    //格式化输出
+                    println(jsonOutput.prettyPrint(result))
+                    mv.visitLdcInsn(result)
+                    mv.visitLdcInsn(Type.getReturnType(methodDesc).toString())
+                    if(autoAnnotationVisitor.mAnnotationName.contains(annotationPath))
+                    {
+                        mv.visitMethodInsn(INVOKESTATIC, annotationReceive,
+                                "onInterceptForAnnotation", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;", false)
+                    }else if(autoAnnotationVisitor.mAnnotationName.contains(Controller.getAnnotationPath()))
+                    {
+                        mv.visitMethodInsn(INVOKESTATIC, Controller.getAnnotationReceiver(),
+                                "onInterceptForAnnotation", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;", false)
+                    }
+                    ParamsHelper.returnResult(mv, Type.getReturnType(methodDesc))
+                }
+            }
+        }
+    }
+
+    public void onInterceptForClass()
+    {
+        // synthetic 方法暂时不aop 比如AsyncTask 会生成一些同名 synthetic方法,对synthetic 以及private的方法也插入的代码，主要是针对lambda表达式
+        if (((methodAccess & Opcodes.ACC_SYNTHETIC) != 0) && ((methodAccess & Opcodes.ACC_PRIVATE) == 0)) {
+            return
+        }
+        if ((methodAccess & Opcodes.ACC_NATIVE) != 0) {
+            return
+        }
+
+        boolean isStatic = false
+        //如果是静态方法，则没有this实例
+        if ((methodAccess & ACC_STATIC) == 0) {
+            loadThis()
+            isStatic = false
+        } else {
+            push((String) null);
+            isStatic = true
+        }
+
+        mv.visitLdcInsn(className)
+        mv.visitLdcInsn(methodName)
+
+        List<Type> paramsTypeClass = new ArrayList()
+        Type[] argsType = Type.getArgumentTypes(methodDesc)
+        for (Type type : argsType) {
+            paramsTypeClass.add(type)
+        }
+        if (paramsTypeClass.size() == 0) {
+            push((String) null)
+        } else {
+            ParamsHelper.createObjectArray(mv, paramsTypeClass, isStatic)
+        }
+        mv.visitLdcInsn(Type.getReturnType(methodDesc).toString())
+        String receiver = Controller.getClassReceiver()
+        if(!TextUtil.isEmpty(receiver))
+        {
+            mv.visitMethodInsn(INVOKESTATIC, receiver,
+                    "onInterceptForClass", "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;", false)
+        }else
+        {
+            mv.visitMethodInsn(INVOKESTATIC, classReceiver,
+                    "onInterceptForClass", "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;", false)
+        }
+        ParamsHelper.returnResult(mv, Type.getReturnType(methodDesc))
+    }
+
 }

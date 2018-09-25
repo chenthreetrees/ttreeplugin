@@ -31,6 +31,20 @@ public class TtreeReceiver {
     }
 
     /**
+     * 通过匹配规则，拦截方法
+     * @param object
+     * @param className
+     * @param methodName
+     * @param objects
+     * @param returnType
+     * @return
+     */
+    public static Object onInterceptForClass(Object object,String className,String methodName,Object[] objects,String returnType)
+    {
+        return null;
+    }
+
+    /**
      * 通过匹配规则，调用的入口（方法退出时）
      * @param methodName
      * @param objects
@@ -62,6 +76,23 @@ public class TtreeReceiver {
     }
 
     /**
+     * 通过注解，拦截方法
+     * @param annotationName
+     * @param methodName
+     * @param jsonValue
+     * @param returnType
+     * @return
+     */
+    public static Object onInterceptForAnnotation(String annotationName, String methodName, String jsonValue, String returnType)
+    {
+        if("com.threetree.pluginutil.annotation.Debounce".equals(annotationName))
+        {
+            return handleDebounce(methodName,jsonValue);
+        }
+        return null;
+    }
+
+    /**
      * 通过注解，调用的入口（方法退出时）
      * @param annotationName
      * @param methodName
@@ -84,6 +115,21 @@ public class TtreeReceiver {
     {
         return new Gson()
                 .fromJson(jsonStr, new TypeToken<HashMap<String,Object>>(){}.getType());
+    }
+
+    private static boolean handleDebounce(String method,String jsonValue)
+    {
+        if(!TextUtils.isEmpty(jsonValue))
+        {
+            HashMap<String,Object> map = jsonToMap(jsonValue);
+            Object obj = map.get("time");
+            if(obj instanceof Long)
+            {
+                long interval = (Long) obj;
+                return Debounce.isCanBounce(method,interval);
+            }
+        }
+        return true;
     }
 
     private static void handlePermission(String jsonValue)

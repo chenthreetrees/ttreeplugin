@@ -72,7 +72,7 @@ public class AutoClassVisitor extends ClassVisitor {
         return isMatch
     }
 
-    //0-不匹配 1-类名匹配 2-接口名匹配 3-关键字匹配 4-外部配置匹配
+    //0-不匹配 1-类名匹配 2-接口名匹配 3-关键字匹配 4-外部配置匹配 5-拦截方法
     //这个关键的方法，匹配的规则
     int matchingType(String name, String desc)
     {
@@ -87,6 +87,8 @@ public class AutoClassVisitor extends ClassVisitor {
             String appMethodDes = filter.getMethodDes()
             //是否会被外部的配置重写
             boolean override = filter.getOverride()
+            //是否拦截方法
+            boolean intercept = filter.getIntercept()
 
             //方法匹配
             if(name == appMethodName && desc == appMethodDes)
@@ -100,6 +102,10 @@ public class AutoClassVisitor extends ClassVisitor {
                 {
                     return 4
                 }
+                if(intercept)
+                {
+                    return 5;
+                }
                 Logger.info("||-----------------类名匹配${mClassName}--------------------------")
                 return 1
             }
@@ -111,6 +117,10 @@ public class AutoClassVisitor extends ClassVisitor {
                 {
                     return 4
                 }
+                if(intercept)
+                {
+                    return 5;
+                }
                 Logger.info("||-----------------接口名匹配${appInterfaceName}--------------------------")
                 return 2
             }
@@ -121,6 +131,10 @@ public class AutoClassVisitor extends ClassVisitor {
                 if(override)
                 {
                     return 4
+                }
+                if(intercept)
+                {
+                    return 5;
                 }
                 Logger.info("||-----------------关键字匹配${appContainName}--------------------------")
                 return 3
@@ -141,7 +155,7 @@ public class AutoClassVisitor extends ClassVisitor {
     MethodVisitor getSettingMethodVisitor(MethodVisitor methodVisitor, int access, String name, String desc) {
         AutoMethodVisitor adapter = null
         int result = matchingType(name,desc)
-        Closure vivi = Controller.getAppMethodVistor()
+        Closure vivi = Controller.getMethodVistor()
         if (vivi != null && result==4) {
             Logger.info("||-----------------外部配置匹配${name}--------------------------")
             try {

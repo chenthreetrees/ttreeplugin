@@ -74,7 +74,7 @@ public class Controller {
         methodVisitor = visitor
     }
 
-    static Closure getAppMethodVistor() {
+    static Closure getMethodVistor() {
         return methodVisitor
     }
 

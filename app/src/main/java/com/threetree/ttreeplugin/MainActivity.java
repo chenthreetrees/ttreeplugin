@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.threetree.pluginutil.annotation.Cut;
+import com.threetree.pluginutil.annotation.Debounce;
 import com.threetree.pluginutil.annotation.Permission;
 import com.threetree.pluginutil.annotation.TimeCost;
 import com.threetree.pluginutil.permission.PermissionConsts;
@@ -77,7 +78,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v)
     {
-
+        int id = v.getId();
     }
 
+    @Debounce(time = 1000,onIntercept = true)
+    public int testIntercept()
+    {
+        int id = 234;
+        return id;
+    }
+
+    public void testInterceptForClass()
+    {
+        int id = 234;
+    }
 }

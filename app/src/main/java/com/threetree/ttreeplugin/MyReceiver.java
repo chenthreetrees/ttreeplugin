@@ -90,4 +90,10 @@ public class MyReceiver {
         return new Gson()
                 .fromJson(jsonStr, new TypeToken<HashMap<String,Object>>(){}.getType());
     }
+
+
+    public static boolean shouldDoClick()
+    {
+        return false;
+    }
 }

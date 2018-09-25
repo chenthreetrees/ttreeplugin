@@ -10,4 +10,5 @@ class AutoClassFilter {
     String MethodName
     String MethodDes
     boolean Override
+    boolean Intercept
 }

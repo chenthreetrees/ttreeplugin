@@ -61,21 +61,27 @@ ttree {
 ```
 
 **注意:** ttree，isDebug，matchData，AnnotationPath,AnnotationReceiver,ClassReceiver
-ClassFilter，ClassName，MethodName，ContainName，InterfaceName，MethodDes，Override，MethodVisitor，
+ClassFilter，ClassName，MethodName，ContainName，InterfaceName，MethodDes，Override，MethodVisitor，Intercept
 这些约定的拼写不能错误。
 
 **AnnotationPath:** String类型，使用自定义注解时，注解所在的包路径
 
-**AnnotationReceiver:** String类型，使用自定义注解时，处理注解的类，必须使用全路径，
-					处理的方法必须是：`public static void onMethodExitForAnnotation`和`public static void onMethodExitForAnnotation`，
-					参数类型必须是：`(String annotationName,String methodName, String jsonValue)`，jsonValue的结构是Hashmap<String,Object>,对应注解的key和value。
-					
-**ClassReceiver:** String类型，使用匹配规则时的处理类，必须使用全路径，可以与AnnotationReceiver同名，
-					处理的方法必须是：`public static void onMethodEnterForClass`和`public static void onMethodExitForClass`，
-					参数类型必须是：`(Object object,String className,String methodName,Object[] objects)`，
-					object 表示该方法的类对象指针，即this（注意内部类的this），静态方法该值为null，className表示全路径类名（注意内部类的类名），
-					methodName表示方法名，objects存放了methodName这个方法的参数值，
-					自定义ClassReceiver之后，拓展包里面的ClassReceiver将不再接收。
+**AnnotationReceiver:** String类型，使用自定义注解时，处理注解的类，必须使用全路径。
+                    处理的方法：
+                    匹配注解，方法进入时调用`public static void onMethodExitForAnnotation(String annotationName,String methodName, String jsonValue)`
+                    匹配注解，方法拦截时调用`public static Object onInterceptForAnnotation(String annotationName, String methodName, String jsonValue, String returnType)`
+                    匹配注解，方法退出时调用`public static void onMethodExitForAnnotation(String annotationName,String methodName, String jsonValue)`
+                    其中需要注意，方法名和参数类型，返回类型必须与上面的一致，jsonValue的结构是Hashmap<String,Object>,对应注解的key和value，当使用拦截规则时候，onMethodExitForAnnotation将不会再被调用。
+
+**ClassReceiver:** String类型，使用匹配规则时的处理类，必须使用全路径，可以与AnnotationReceiver同名。
+                    处理的方法：
+                    根据类名等规则匹配，方法进入时调用`public static void onMethodEnterForClass(Object object,String className,String methodName,Object[] objects)`
+                    根据类名等规则匹配，方法拦截时调用`public static Object onInterceptForClass(Object object,String className,String methodName,Object[] objects,String returnType)`
+                    根据类名等规则匹配，方法退出时调用`public static void onMethodExitForClass(Object object,String className,String methodName,Object[] objects)`
+
+					其中需要注意，方法名和参数类型，返回类型必须与上面的一致，object 表示该方法的类对象指针，即this（注意内部类的this），静态方法该值为null，
+					className表示全路径类名（注意内部类的类名），methodName表示方法名，objects存放了methodName这个方法的参数值，
+					自定义ClassReceiver之后，拓展包里面的ClassReceiver将不再接收，当使用拦截规则时候，onMethodExitForAnnotation将不会再被调用。。
 					
 **ClassName:** String类型，类名，全路径
 
@@ -87,9 +93,11 @@ ClassFilter，ClassName，MethodName，ContainName，InterfaceName，MethodDes�
 	
 **MethodDes:** String类型，方法的描述符
 
-**Override:** boolean类型，是否重载MethodVisitor（高级用法，需要对asm有一定的了解）
+**Override:** boolean类型，是否重载MethodVisitor（高级用法，需要对asm有一定的了解，不推荐使用）
 
 **MethodVisitor:** 在Override为true的时候使用（参考demo）
+
+**Intercept:**boolean类型，是否需要拦截方法（如果需要使用注解来拦截方法，注解需要定义一个boolean类型的key为onIntercept，在使用的地方赋值为true）
 
 **匹配规则优先级:** ClassName > InterfaceName > ContainName
 
@@ -159,6 +167,9 @@ TtreePlugin.setOnCutListener(new TtreePlugin.IOnCutListener() {
             }
         });
 ```
+**仿抖动**
+在需要防抖动的地方添加`@Debounce(time = 1000,onIntercept = true)`
+time为抖动的时间
 
 
 **动态权限申请**
