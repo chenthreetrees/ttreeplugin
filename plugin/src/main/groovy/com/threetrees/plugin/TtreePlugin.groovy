@@ -44,7 +44,6 @@ class TtreePlugin implements Plugin<Project> {
                 String methodName = map.get("MethodName")
                 String methodDes = map.get("MethodDes")
                 boolean override = false
-                boolean intercept = false
                 // 全类名
                 if (!TextUtil.isEmpty(className)){
                     className = TextUtil.changeClassNameSeparator(className)
@@ -59,11 +58,6 @@ class TtreePlugin implements Plugin<Project> {
                     override = map.get("Override")
                 }
 
-                if(map.containsKey("Intercept"))
-                {
-                    intercept = map.get("Intercept")
-                }
-
                 AutoClassFilter classFilter = new AutoClassFilter()
                 classFilter.setContainName(containName)
                 classFilter.setClassName(className)
@@ -71,7 +65,6 @@ class TtreePlugin implements Plugin<Project> {
                 classFilter.setMethodName(methodName)
                 classFilter.setMethodDes(methodDes)
                 classFilter.setOverride(override)
-                classFilter.setIntercept(intercept)
                 Controller.addClassFilter(classFilter)
 
                 Logger.info('应用传递过来的数据->' + '\n-containName:' + containName + '\n-className:' + className +
