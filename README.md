@@ -17,7 +17,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.github.chenthreetrees:ttreeplugin:2.0.7'
+        classpath 'com.github.chenthreetrees:ttreeplugin:2.0.8'
     }
 }
 ```
@@ -40,7 +40,7 @@ allprojects {
 
 在app的gradle文件引用依赖：
 ```
-compile 'com.github.chenthreetrees:ttreepluginext:1.0.6'
+compile 'com.github.chenthreetrees:ttreepluginext:1.0.7'
 ```
 
 在application初始化：
