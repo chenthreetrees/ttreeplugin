@@ -17,7 +17,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.github.chenthreetrees:ttreeplugin:2.0.8'
+        classpath 'com.github.chenthreetrees:ttreeplugin:2.0.9'
     }
 }
 ```
