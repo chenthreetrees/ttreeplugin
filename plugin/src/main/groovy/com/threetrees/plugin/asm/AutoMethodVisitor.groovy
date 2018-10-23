@@ -167,17 +167,24 @@ public class AutoMethodVisitor extends AdviceAdapter {
         annotations.each {
             AutoAnnotationVisitor autoAnnotationVisitor ->
                 onMethodForAnnotation(autoAnnotationVisitor,"onMethodEnterForAnnotation")
+                Label l1 = new Label();
+                Label l2 = new Label();
+                mv.visitJumpInsn(IFEQ, l1);
+                mv.visitLabel(l2);
                 onInterceptForAnnotation(autoAnnotationVisitor)
+                mv.visitLabel(l1);
         }
 
         if(mMatchType != 0)
         {
             Logger.info("||-----------------onMethodEnterForClass: ${methodName}--------------------------")
             onMethodForClass("onMethodEnterForClass");
-            if(mMatchType == 5)
-            {
-                onInterceptForClass()
-            }
+            Label l1 = new Label();
+            Label l2 = new Label();
+            mv.visitJumpInsn(IFEQ, l1);
+            mv.visitLabel(l2);
+            onInterceptForClass()
+            mv.visitLabel(l1);
         }
 
     }
@@ -199,25 +206,66 @@ public class AutoMethodVisitor extends AdviceAdapter {
 
     public void onMethodForAnnotation(AutoAnnotationVisitor autoAnnotationVisitor, String action)
     {
+
+        // synthetic 方法暂时不aop 比如AsyncTask 会生成一些同名 synthetic方法,对synthetic 以及private的方法也插入的代码，主要是针对lambda表达式
+        if (((methodAccess & Opcodes.ACC_SYNTHETIC) != 0) && ((methodAccess & Opcodes.ACC_PRIVATE) == 0)) {
+            return
+        }
+        if ((methodAccess & Opcodes.ACC_NATIVE) != 0) {
+            return
+        }
+
+        boolean isStatic = false
+        //如果是静态方法，则没有this实例
+        if ((methodAccess & ACC_STATIC) == 0) {
+            loadThis()
+            isStatic = false
+        } else {
+            push((String) null);
+            isStatic = true
+        }
+
+        mv.visitLdcInsn(className)
+        mv.visitLdcInsn(methodName)
+
         String anno = TextUtil.changeClassNameDot(autoAnnotationVisitor.mAnnotationName)
         anno = TextUtil.changeName(anno)
-
         mv.visitLdcInsn(anno)
-        mv.visitLdcInsn(methodName)
+
+        List<Type> paramsTypeClass = new ArrayList()
+        Type[] argsType = Type.getArgumentTypes(methodDesc)
+        for (Type type : argsType) {
+            paramsTypeClass.add(type)
+        }
+        if (paramsTypeClass.size() == 0) {
+            push((String) null)
+        } else {
+            ParamsHelper.createObjectArray(mv, paramsTypeClass, isStatic)
+        }
+
         def jsonOutput = new JsonOutput()
         def result = jsonOutput.toJson(map.get(autoAnnotationVisitor.mAnnotationName))
         //格式化输出
         println(jsonOutput.prettyPrint(result))
         mv.visitLdcInsn(result)
 
+        String des;
+        if(action.equals("onMethodEnterForAnnotation"))
+        {
+            des = "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)Z";
+        }else if(action.equals("onMethodExitForAnnotation"))
+        {
+            des = "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)V";
+        }
+
         if(autoAnnotationVisitor.mAnnotationName.contains(annotationPath))
         {
             mv.visitMethodInsn(INVOKESTATIC, annotationReceive,
-                    action, "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false)
+                    action, des, false)
         }else if(autoAnnotationVisitor.mAnnotationName.contains(Controller.getAnnotationPath()))
         {
             mv.visitMethodInsn(INVOKESTATIC, Controller.getAnnotationReceiver(),
-                    action, "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false)
+                    action, des, false)
         }
     }
 
@@ -254,54 +302,83 @@ public class AutoMethodVisitor extends AdviceAdapter {
         } else {
             ParamsHelper.createObjectArray(mv, paramsTypeClass, isStatic)
         }
+
+        String des;
+        if(action.equals("onMethodEnterForClass"))
+        {
+            des = "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)Z";
+        }else if(action.equals("onMethodExitForClass"))
+        {
+            des = "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)V";
+        }
+
         String receiver = Controller.getClassReceiver()
         if(!TextUtil.isEmpty(receiver))
         {
             mv.visitMethodInsn(INVOKESTATIC, receiver,
-                    action, "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)V", false)
+                    action, des, false)
         }else
         {
             mv.visitMethodInsn(INVOKESTATIC, classReceiver,
-                    action, "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)V", false)
+                    action, des, false)
         }
     }
 
     public void onInterceptForAnnotation(AutoAnnotationVisitor autoAnnotationVisitor)
     {
-        HashMap<String,Object> values = map.get(autoAnnotationVisitor.mAnnotationName)
-        if(values.containsKey("onIntercept"))
-        {//如果注解包含了此属性，则认为该注解使用了拦截功能
 
-            Object object = values.get("onIntercept");
-            if(object instanceof Boolean)
-            {//判断该注解的值是否为true
-                boolean flag = (boolean)object;
-                if(flag)
-                {
-                    String anno = TextUtil.changeClassNameDot(autoAnnotationVisitor.mAnnotationName)
-                    anno = TextUtil.changeName(anno)
-
-                    mv.visitLdcInsn(anno)
-                    mv.visitLdcInsn(methodName)
-                    def jsonOutput = new JsonOutput()
-                    def result = jsonOutput.toJson(map.get(autoAnnotationVisitor.mAnnotationName))
-                    //格式化输出
-                    println(jsonOutput.prettyPrint(result))
-                    mv.visitLdcInsn(result)
-                    mv.visitLdcInsn(Type.getReturnType(methodDesc).toString())
-                    if(autoAnnotationVisitor.mAnnotationName.contains(annotationPath))
-                    {
-                        mv.visitMethodInsn(INVOKESTATIC, annotationReceive,
-                                "onInterceptForAnnotation", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;", false)
-                    }else if(autoAnnotationVisitor.mAnnotationName.contains(Controller.getAnnotationPath()))
-                    {
-                        mv.visitMethodInsn(INVOKESTATIC, Controller.getAnnotationReceiver(),
-                                "onInterceptForAnnotation", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;", false)
-                    }
-                    ParamsHelper.returnResult(mv, Type.getReturnType(methodDesc))
-                }
-            }
+        // synthetic 方法暂时不aop 比如AsyncTask 会生成一些同名 synthetic方法,对synthetic 以及private的方法也插入的代码，主要是针对lambda表达式
+        if (((methodAccess & Opcodes.ACC_SYNTHETIC) != 0) && ((methodAccess & Opcodes.ACC_PRIVATE) == 0)) {
+            return
         }
+        if ((methodAccess & Opcodes.ACC_NATIVE) != 0) {
+            return
+        }
+
+        boolean isStatic = false
+        //如果是静态方法，则没有this实例
+        if ((methodAccess & ACC_STATIC) == 0) {
+            loadThis()
+            isStatic = false
+        } else {
+            push((String) null);
+            isStatic = true
+        }
+
+        mv.visitLdcInsn(className)
+        mv.visitLdcInsn(methodName)
+
+        String anno = TextUtil.changeClassNameDot(autoAnnotationVisitor.mAnnotationName)
+        anno = TextUtil.changeName(anno)
+        mv.visitLdcInsn(anno)
+
+        List<Type> paramsTypeClass = new ArrayList()
+        Type[] argsType = Type.getArgumentTypes(methodDesc)
+        for (Type type : argsType) {
+            paramsTypeClass.add(type)
+        }
+        if (paramsTypeClass.size() == 0) {
+            push((String) null)
+        } else {
+            ParamsHelper.createObjectArray(mv, paramsTypeClass, isStatic)
+        }
+
+        def jsonOutput = new JsonOutput()
+        def result = jsonOutput.toJson(map.get(autoAnnotationVisitor.mAnnotationName))
+        //格式化输出
+        println(jsonOutput.prettyPrint(result))
+        mv.visitLdcInsn(result)
+        mv.visitLdcInsn(Type.getReturnType(methodDesc).toString())
+        if(autoAnnotationVisitor.mAnnotationName.contains(annotationPath))
+        {
+            mv.visitMethodInsn(INVOKESTATIC, annotationReceive,
+                    "onInterceptForAnnotation", "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;", false)
+        }else if(autoAnnotationVisitor.mAnnotationName.contains(Controller.getAnnotationPath()))
+        {
+            mv.visitMethodInsn(INVOKESTATIC, Controller.getAnnotationReceiver(),
+                    "onInterceptForAnnotation", "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;", false)
+        }
+        ParamsHelper.returnResult(mv, Type.getReturnType(methodDesc))
     }
 
     public void onInterceptForClass()

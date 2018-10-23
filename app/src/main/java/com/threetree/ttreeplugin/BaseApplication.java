@@ -3,6 +3,7 @@ package com.threetree.ttreeplugin;
 import android.app.Application;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.threetree.pluginutil.TtreePlugin;
 import com.threetree.pluginutil.permission.PermissionUtil;
@@ -40,9 +41,9 @@ public class BaseApplication extends Application {
             }
         });
 
-        TtreePlugin.setOnTrackListener(new TtreePlugin.IOnTrackListener() {
+        TtreePlugin.setOnMethodListener(new TtreePlugin.IOnMethodListener() {
             @Override
-            public void onTrackEnter(Object object, String className,String methodName, Object[] objects)
+            public boolean onMethodEnter(Object object, String className, String methodName, Object[] objects)
             {
                 if("onClick".equals(methodName))
                 {
@@ -51,11 +52,15 @@ public class BaseApplication extends Application {
                         View view = (View)objects[0];
                         Log.e("onClickEnter","view=" + view.getId());
                     }
+                }else if("testInterceptForClass".equals(methodName))
+                {
+                    return true;
                 }
+                return false;
             }
 
             @Override
-            public void onTrackExit(Object object, String className,String methodName, Object[] objects)
+            public void onMethodExit(Object object, String className, String methodName, Object[] objects)
             {
                 if("onClick".equals(methodName))
                 {
@@ -65,6 +70,19 @@ public class BaseApplication extends Application {
                         Log.e("onClickExit","view=" + view.getId());
                     }
                 }
+            }
+        });
+
+        TtreePlugin.setOnInterceptListener(new TtreePlugin.IOnInterceptListener() {
+            @Override
+            public Object onIntercept(Object object, String className, String methodName, String annotationName, Object[] objects, String jsonValue, String returnType)
+            {
+                if("testInterceptForClass".equals(methodName))
+                {
+                    Toast.makeText(getApplicationContext(),"testInterceptForClass is intercepted",Toast.LENGTH_SHORT).show();
+                    return 0;
+                }
+                return TtreePlugin.getReturnType(returnType);
             }
         });
     }

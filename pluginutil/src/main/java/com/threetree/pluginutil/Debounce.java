@@ -17,9 +17,9 @@ public class Debounce {
      * @return
      */
     public static boolean isCanBounce(String method,long interval) {
-        if(!map.containsKey(method))
-            return true;
-        long time = map.get(method);
+        long time = 0;
+        if(map.containsKey(method))
+            time = map.get(method);
         if (System.currentTimeMillis() - time < interval){
             return false;
         }

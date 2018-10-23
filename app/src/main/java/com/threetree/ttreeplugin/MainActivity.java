@@ -3,6 +3,7 @@ package com.threetree.ttreeplugin;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Toast;
 
 import com.threetree.pluginutil.annotation.Cut;
 import com.threetree.pluginutil.annotation.Debounce;
@@ -13,18 +14,20 @@ import com.threetree.ttreeplugin.annotation.TestTree;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private int mCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        testPermission();
         findViewById(R.id.text_tv).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)
             {
-
+                testInterceptForClass();
+//                testIntercept();
             }
         });
     }
@@ -65,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Permission({PermissionConsts.STORAGE, PermissionConsts.CAMERA})
     public void testPermission()
     {
-
+        int id = 2;
     }
 
     //测试重写MethodVisitor
@@ -81,15 +84,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int id = v.getId();
     }
 
-    @Debounce(time = 1000,onIntercept = true)
+    @Debounce(time = 1000)
     public int testIntercept()
     {
-        int id = 234;
-        return id;
+        mCount++;
+        Toast.makeText(MainActivity.this,"test:"+mCount,Toast.LENGTH_SHORT).show();
+        return 0;
     }
 
-    public void testInterceptForClass()
+    public int testInterceptForClass()
     {
         int id = 234;
+        Toast.makeText(MainActivity.this,"test:"+id,Toast.LENGTH_SHORT).show();
+        return id;
     }
 }

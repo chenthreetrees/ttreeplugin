@@ -24,7 +24,8 @@ public final  class TtreePlugin {
     private static PermissionUtil.OnPermissionGrantedListener mOnPermissionGrantedListener;
 
     private static IOnCutListener mOnCutListener;
-    private static IOnTrackListener mOnTrackListener;
+    private static IOnMethodListener mOnMethodListener;
+    private static IOnInterceptListener mOnInterceptListener;
 
     /**
      * 切面注入代码的监听
@@ -36,14 +37,21 @@ public final  class TtreePlugin {
         void onCutExit(int type);
     }
 
-    /**
-     *数据埋点监听
-     */
-    public interface IOnTrackListener
+    public interface IOnInterceptListener
     {
-        void onTrackEnter(Object object,String className,String methodName,Object[] objects);
+        Object onIntercept(Object object, String className,
+                         String methodName, String annotationName,
+                         Object[] objects, String jsonValue, String returnType);
+    }
 
-        void onTrackExit(Object object,String className,String methodName,Object[] objects);
+    /**
+     *方法进入退出监听，可做数据埋点
+     */
+    public interface IOnMethodListener
+    {
+        boolean onMethodEnter(Object object, String className, String methodName, Object[] objects);
+
+        void onMethodExit(Object object, String className, String methodName, Object[] objects);
     }
 
     /**
@@ -102,13 +110,52 @@ public final  class TtreePlugin {
         return mOnCutListener;
     }
 
-    public static IOnTrackListener getOnTrackListener()
+    public static IOnMethodListener getOnMethodListener()
     {
-        return mOnTrackListener;
+        return mOnMethodListener;
     }
 
-    public static void setOnTrackListener(IOnTrackListener listener)
+    public static void setOnMethodListener(IOnMethodListener listener)
     {
-        TtreePlugin.mOnTrackListener = listener;
+        TtreePlugin.mOnMethodListener = listener;
+    }
+
+    public static IOnInterceptListener getOnInterceptListener()
+    {
+        return mOnInterceptListener;
+    }
+
+    public static void setOnInterceptListener(IOnInterceptListener listener)
+    {
+        TtreePlugin.mOnInterceptListener = listener;
+    }
+
+    public static Object getReturnType(String returnType)
+    {
+        if("Z".equals(returnType)){
+            return false;
+        }
+        else if("B".equals(returnType)){
+            return 0;
+        }
+        else if("C".equals(returnType)){
+            return '\u0000';
+        }
+        else if("S".equals(returnType)){
+            return 0;
+        }
+        else if("I".equals(returnType)){
+            return 0;
+        }
+        else if("F".equals(returnType)){
+            return 0.0f;
+        }
+        else if("D".equals(returnType)){
+            return 0.0;
+        }
+        else if("J".equals(returnType)){
+            return 0l;
+        }
+        return null;
     }
 }

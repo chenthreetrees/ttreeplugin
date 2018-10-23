@@ -12,6 +12,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Debounce {
 
-    boolean onIntercept();
     long time();
 }
